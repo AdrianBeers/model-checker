@@ -1,6 +1,8 @@
 # ninja log v5
-0	630	6911012265331196	CMakeFiles/model_checker.dir/main.cpp.obj	886e856bff38c0ae
-634	788	6911012266891654	model_checker.exe	d020bfcd69c14b27
-9	82	6911047698295610	CMakeFiles/model_checker.dir/Parser.cpp.obj	df7ed97f41a38661
-4	578	6911047703237683	CMakeFiles/model_checker.dir/main.cpp.obj	886e856bff38c0ae
-579	931	6911047706759751	model_checker.exe	c52585eb860358e6
+5	510	6911175702913064	CMakeFiles/model_checker.dir/main.cpp.obj	886e856bff38c0ae
+510	624	6911175704026689	model_checker.exe	c52585eb860358e6
+11	77	6911175698584637	CMakeFiles/model_checker.dir/Parser.cpp.obj	df7ed97f41a38661
+8	64	6911216025313493	CMakeFiles/model_checker.dir/Parser.cpp.obj	df7ed97f41a38661
+12	463	6911216029293637	CMakeFiles/model_checker.dir/Formulae.cpp.obj	510e14f38d7d54af
+3	487	6911216029545721	CMakeFiles/model_checker.dir/main.cpp.obj	886e856bff38c0ae
+488	598	6911216030612907	model_checker.exe	d784fdb15d955c64

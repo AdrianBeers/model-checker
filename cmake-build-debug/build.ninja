@@ -61,6 +61,12 @@ build CMakeFiles/model_checker.dir/Parser.cpp.obj: CXX_COMPILER__model_checker_D
   OBJECT_DIR = CMakeFiles\model_checker.dir
   OBJECT_FILE_DIR = CMakeFiles\model_checker.dir
 
+build CMakeFiles/model_checker.dir/Formulae.cpp.obj: CXX_COMPILER__model_checker_Debug C$:/Users/20192920/Desktop/Uni/Y4Q2$ Algorithms$ for$ Model$ Checking/model-checker/Formulae.cpp || cmake_object_order_depends_target_model_checker
+  DEP_FILE = CMakeFiles\model_checker.dir\Formulae.cpp.obj.d
+  FLAGS = -g -std=gnu++20
+  OBJECT_DIR = CMakeFiles\model_checker.dir
+  OBJECT_FILE_DIR = CMakeFiles\model_checker.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target model_checker
@@ -69,7 +75,7 @@ build CMakeFiles/model_checker.dir/Parser.cpp.obj: CXX_COMPILER__model_checker_D
 #############################################
 # Link the executable model_checker.exe
 
-build model_checker.exe: CXX_EXECUTABLE_LINKER__model_checker_Debug CMakeFiles/model_checker.dir/main.cpp.obj CMakeFiles/model_checker.dir/Parser.cpp.obj
+build model_checker.exe: CXX_EXECUTABLE_LINKER__model_checker_Debug CMakeFiles/model_checker.dir/main.cpp.obj CMakeFiles/model_checker.dir/Parser.cpp.obj CMakeFiles/model_checker.dir/Formulae.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\model_checker.dir
