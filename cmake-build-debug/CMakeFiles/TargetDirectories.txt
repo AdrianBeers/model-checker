@@ -1,3 +1,0 @@
-C:/Users/20192920/Desktop/Uni/Y4Q2 Algorithms for Model Checking/model-checker/cmake-build-debug/CMakeFiles/model_checker.dir
-C:/Users/20192920/Desktop/Uni/Y4Q2 Algorithms for Model Checking/model-checker/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/20192920/Desktop/Uni/Y4Q2 Algorithms for Model Checking/model-checker/cmake-build-debug/CMakeFiles/rebuild_cache.dir
