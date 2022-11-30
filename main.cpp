@@ -14,7 +14,7 @@ int main() {
     getline(cin, input);
 
     // Parse string to formula
-    Parser p;
+    MuCalculusParser p;
     shared_ptr<Formula> f = p.parse(input);
 
     // Print formula to string
