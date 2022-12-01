@@ -18,6 +18,8 @@ public:
     uint32_t initialState;
     uint32_t nrStates;
     map<const lts_map_key, const uint32_t> edges;
+
+    void pprint();
 };
 
 
