@@ -364,6 +364,7 @@ shared_ptr<LTS> LTSParser::parse(std::string input) {
         uint32_t src, target;
         string action;
 
+        // Parse edge
         expect("(");
         src = parseUnsignedInt32();
         expect(",\"");
@@ -374,7 +375,16 @@ shared_ptr<LTS> LTSParser::parse(std::string input) {
         skipWhiteSpace();
         skipNewLine();
 
-        lts.edges.insert({make_pair(src, action), target});
+        // Store edge in data structure
+        lts_map_key key = make_pair(src, action);
+        if (lts.edges.contains(key)) {
+            lts.edges[key].push_back(target);
+        } else {
+            lts.edges.insert({key, {target}});
+        }
+
+        // Increase number of transitions
+        lts.nrTransitions++;
     }
 
     return make_shared<LTS>(lts);

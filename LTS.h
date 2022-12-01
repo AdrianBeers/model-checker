@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <string>
 #include <map>
+#include <list>
 
 using namespace std;
 
@@ -16,8 +17,9 @@ typedef pair<const uint32_t, const string> lts_map_key;
 class LTS {
 public:
     uint32_t initialState;
+    uint32_t nrTransitions;
     uint32_t nrStates;
-    map<const lts_map_key, const uint32_t> edges;
+    map<lts_map_key, list<uint32_t>> edges;
 
     void pprint();
 };

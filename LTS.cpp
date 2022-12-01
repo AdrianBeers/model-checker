@@ -8,9 +8,11 @@
 using namespace std;
 
 void LTS::pprint() {
-    cout << "des (" << initialState << "," << edges.size() << "," << nrStates << ")" << endl;
-    for (const auto &edge: edges) {
+    cout << "des (" << initialState << "," << nrTransitions << "," << nrStates << ")" << endl;
+    for (auto &edge: edges) {
         lts_map_key key = edge.first;
-        cout << "(" << key.first << ",\"" << key.second << "\"," << edge.second << ")" << endl;
+        for (uint32_t target : edge.second) {
+            cout << "(" << key.first << ",\"" << key.second << "\"," << target << ")" << endl;
+        }
     }
 }
