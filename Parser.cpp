@@ -13,29 +13,68 @@ using namespace std;
 
 /// Basic parsing
 
-template <class T>
-void Parser<T>::expect(const string& e) {
+bool actionNameFirst(char c) { return (c >= 'a' && c <= 'z'); }
+
+bool actionNameNotFirst(char c) { return (actionNameFirst(c) || (c >= '0' && c <= '9') || c == '_'); }
+
+template<class T>
+void Parser<T>::expect(const string &e) {
     if (I.substr(i, e.length()) != e) {
-        throw invalid_argument("Parse Exception in expect");
+        throw invalid_argument("Parse Exception in expect at position " + to_string(i));
     } else {
         i += e.length();
     }
 }
 
-template <class T>
+template<class T>
 void Parser<T>::skipWhiteSpace() {
-    while (I[i] == ' ') {
+    while (i < I.length() && (I[i] == ' ' || I[i] == '\t')) {
         i++;
     }
 }
 
-template <class T>
+template<class T>
 void Parser<T>::requireWhiteSpace() {
-    if (I[i] != ' ') {
+    if (i >= I.length() || (I[i] != ' ' && I[i] != '\t')) {
         throw invalid_argument("Parse Exception in requireWhiteSpace");
     }
 
     skipWhiteSpace();
+}
+
+template<class T>
+void Parser<T>::skipNewLine() {
+    while (i < I.length() && (I[i] == '\n' || I[i] == '\r')) {
+        i++;
+    }
+}
+
+template<class T>
+void Parser<T>::requireNewLine() {
+    if (i >= I.length() || (I[i] != '\n' && I[i] != '\n')) {
+        throw invalid_argument("Parse Exception in requireNewLine");
+    }
+
+    skipNewLine();
+}
+
+template<class T>
+string Parser<T>::parseActionName() {
+    string n;
+
+    if (actionNameFirst(I[i])) {
+        n.push_back(I[i]);
+        i++;
+    } else {
+        throw invalid_argument("Parse Exception in parseActionName");
+    }
+
+    while (actionNameNotFirst(I[i])) {
+        n.push_back(I[i]);
+        i++;
+    }
+
+    return n;
 }
 
 
@@ -59,13 +98,13 @@ bool boxFormulaFirst(char c) { return c == '['; }
 
 bool formulaFirst(char c) {
     return trueLiteralFirst(c) ||
-        falseLiteralFirst(c) ||
-        recursionVariableFirst(c) ||
-        logicFormulaFirst(c) ||
-        muFormulaFirst(c) ||
-        nuFormulaFirst(c) ||
-        diamondFormulaFirst(c) ||
-        boxFormulaFirst(c);
+           falseLiteralFirst(c) ||
+           recursionVariableFirst(c) ||
+           logicFormulaFirst(c) ||
+           muFormulaFirst(c) ||
+           nuFormulaFirst(c) ||
+           diamondFormulaFirst(c) ||
+           boxFormulaFirst(c);
 }
 
 bool andOperatorFirst(char c) { return c == '&'; }
@@ -73,10 +112,6 @@ bool andOperatorFirst(char c) { return c == '&'; }
 bool orOperatorFirst(char c) { return c == '|'; }
 
 bool operatorFirst(char c) { return (andOperatorFirst(c) || orOperatorFirst(c)); }
-
-bool actionNameFirst(char c) { return (c >= 'a' && c <= 'z'); }
-
-bool actionNameNotFirst(char c) { return (actionNameFirst(c) || (c >= '0' && c <= '9') || c == '_'); }
 
 shared_ptr<Formula> MuCalculusParser::parse(string input) {
     this->I = std::move(input);
@@ -300,20 +335,61 @@ shared_ptr<Formula> MuCalculusParser::parseBoxFormula() {
     return b;
 }
 
-string MuCalculusParser::parseActionName() {
+
+/// LTS parsing
+
+bool digitFirst(char c) { return c >= '0' && c <= '9'; }
+
+shared_ptr<LTS> LTSParser::parse(std::string input) {
+    LTS lts;
+
+    I = std::move(input);
+    i = 0;
+
+    // Parse header
+    expect("des");
+    skipWhiteSpace();
+    expect("(");
+    lts.initialState = parseUnsignedInt32();
+    expect(",");
+    parseUnsignedInt32();
+    expect(",");
+    lts.nrStates = parseUnsignedInt32();
+    expect(")");
+    skipWhiteSpace();
+    requireNewLine();
+
+    // Parse edges
+    while (i < I.length()) {
+        uint32_t src, target;
+        string action;
+
+        expect("(");
+        src = parseUnsignedInt32();
+        expect(",\"");
+        action = parseActionName();
+        expect("\",");
+        target = parseUnsignedInt32();
+        expect(")");
+        skipWhiteSpace();
+        skipNewLine();
+
+        lts.edges.insert({make_pair(src, action), target});
+    }
+
+    return make_shared<LTS>(lts);
+}
+
+uint32_t LTSParser::parseUnsignedInt32() {
+    if (!digitFirst(I[i])) {
+        throw invalid_argument("Parse Exception in parseUnsignedInt32");
+    }
+
     string n;
-
-    if (actionNameFirst(I[i])) {
+    do {
         n.push_back(I[i]);
         i++;
-    } else {
-        throw invalid_argument("Parse Exception in parseActionName");
-    }
+    } while (digitFirst(I[i]));
 
-    while (actionNameNotFirst(I[i])) {
-        n.push_back(I[i]);
-        i++;
-    }
-
-    return n;
+    return stoul(n);
 }

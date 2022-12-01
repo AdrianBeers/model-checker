@@ -21,6 +21,10 @@ protected:
     void expect(const string& e);
     void skipWhiteSpace();
     void requireWhiteSpace();
+    void skipNewLine();
+    void requireNewLine();
+
+    string parseActionName();
 public:
     virtual shared_ptr<T> parse(string input) = 0;
 };
@@ -38,12 +42,12 @@ class MuCalculusParser : public Parser<Formula> {
     shared_ptr<Formula> parseNuFormula();
     shared_ptr<Formula> parseDiamondFormula();
     shared_ptr<Formula> parseBoxFormula();
-    string parseActionName();
 public:
     shared_ptr<Formula> parse(std::string input) override;
 };
 
 class LTSParser: public Parser<LTS> {
+    uint32_t parseUnsignedInt32();
 public:
     shared_ptr<LTS> parse(std::string input) override;
 };

@@ -53,13 +53,21 @@ int main(int argc, char **argv) {
     }
 
     // Parse mu-calculus formula
-    MuCalculusParser p;
-    shared_ptr<Formula> f = p.parse(formulaInput);
+    MuCalculusParser mcp;
+    shared_ptr<Formula> f = mcp.parse(formulaInput);
 
-    // Print formula to string
+    // Print formula to console
     cout << "Parsed mu-calculus formula:" << endl;
     f->pprint();
     cout << endl;
+
+    // Parse LTS
+    LTSParser lp;
+    shared_ptr<LTS> lts = lp.parse(ltsInput);
+
+    // Print LTS
+    cout << "Parsed LTS:" << endl;
+    lts->pprint();
 
     return 0;
 }
