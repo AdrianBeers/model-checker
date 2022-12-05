@@ -15,10 +15,8 @@ using namespace std;
 
 
 typedef set<uint32_t> vset;
-typedef map<char, shared_ptr<vset>> context;
 
-
-shared_ptr<vset> naiveMuCalculusSolve(shared_ptr<LTS> lts, shared_ptr<Formula> f);
+shared_ptr<vset> naiveSolve(shared_ptr<LTS> lts, shared_ptr<Formula> f);
 
 
 #endif //MODEL_CHECKER_ALGORITHM_H
