@@ -7,6 +7,12 @@
 
 using namespace std;
 
+LTS::LTS() {
+    initialState = 0;
+    nrStates = 0;
+    nrTransitions = 0;
+}
+
 void LTS::pprint() {
     cout << "des (" << initialState << "," << nrTransitions << "," << nrStates << ")" << endl;
     for (auto &edge: edges) {
