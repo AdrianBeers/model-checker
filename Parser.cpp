@@ -10,6 +10,76 @@
 
 using namespace std;
 
+
+/// Basic parsing
+
+bool actionNameFirst(char c) { return (c >= 'a' && c <= 'z'); }
+
+bool actionNameNotFirst(char c) { return (actionNameFirst(c) || (c >= '0' && c <= '9') || c == '_'); }
+
+template<class T>
+void Parser<T>::expect(const string &e) {
+    if (I.substr(i, e.length()) != e) {
+        throw invalid_argument("Parse Exception in expect at position " + to_string(i));
+    } else {
+        i += e.length();
+    }
+}
+
+template<class T>
+void Parser<T>::skipWhiteSpace() {
+    while (i < I.length() && (I[i] == ' ' || I[i] == '\t')) {
+        i++;
+    }
+}
+
+template<class T>
+void Parser<T>::requireWhiteSpace() {
+    if (i >= I.length() || (I[i] != ' ' && I[i] != '\t')) {
+        throw invalid_argument("Parse Exception in requireWhiteSpace");
+    }
+
+    skipWhiteSpace();
+}
+
+template<class T>
+void Parser<T>::skipNewLine() {
+    while (i < I.length() && (I[i] == '\n' || I[i] == '\r')) {
+        i++;
+    }
+}
+
+template<class T>
+void Parser<T>::requireNewLine() {
+    if (i >= I.length() || (I[i] != '\n' && I[i] != '\n')) {
+        throw invalid_argument("Parse Exception in requireNewLine");
+    }
+
+    skipNewLine();
+}
+
+template<class T>
+string Parser<T>::parseActionName() {
+    string n;
+
+    if (actionNameFirst(I[i])) {
+        n.push_back(I[i]);
+        i++;
+    } else {
+        throw invalid_argument("Parse Exception in parseActionName");
+    }
+
+    while (actionNameNotFirst(I[i])) {
+        n.push_back(I[i]);
+        i++;
+    }
+
+    return n;
+}
+
+
+/// Mu-calculus parsing
+
 bool trueLiteralFirst(char c) { return c == 't'; }
 
 bool falseLiteralFirst(char c) { return c == 'f'; }
@@ -28,13 +98,13 @@ bool boxFormulaFirst(char c) { return c == '['; }
 
 bool formulaFirst(char c) {
     return trueLiteralFirst(c) ||
-        falseLiteralFirst(c) ||
-        recursionVariableFirst(c) ||
-        logicFormulaFirst(c) ||
-        muFormulaFirst(c) ||
-        nuFormulaFirst(c) ||
-        diamondFormulaFirst(c) ||
-        boxFormulaFirst(c);
+           falseLiteralFirst(c) ||
+           recursionVariableFirst(c) ||
+           logicFormulaFirst(c) ||
+           muFormulaFirst(c) ||
+           nuFormulaFirst(c) ||
+           diamondFormulaFirst(c) ||
+           boxFormulaFirst(c);
 }
 
 bool andOperatorFirst(char c) { return c == '&'; }
@@ -43,12 +113,7 @@ bool orOperatorFirst(char c) { return c == '|'; }
 
 bool operatorFirst(char c) { return (andOperatorFirst(c) || orOperatorFirst(c)); }
 
-bool actionNameFirst(char c) { return (c >= 'a' && c <= 'z'); }
-
-bool actionNameNotFirst(char c) { return (actionNameFirst(c) || (c >= '0' && c <= '9') || c == '_'); }
-
-
-shared_ptr<Formula> Parser::parse(string input) {
+shared_ptr<Formula> MuCalculusParser::parse(string input) {
     this->I = std::move(input);
     this->i = 0;
 
@@ -67,7 +132,7 @@ shared_ptr<Formula> Parser::parse(string input) {
     }
 }
 
-shared_ptr<Formula> Parser::parseFormula() {
+shared_ptr<Formula> MuCalculusParser::parseFormula() {
     if (trueLiteralFirst(I[i])) {
         return parseTrueLiteral();
     } else if (falseLiteralFirst(I[i])) {
@@ -89,21 +154,21 @@ shared_ptr<Formula> Parser::parseFormula() {
     }
 }
 
-shared_ptr<Formula> Parser::parseTrueLiteral() {
+shared_ptr<Formula> MuCalculusParser::parseTrueLiteral() {
     expect("true");
     skipWhiteSpace();
     shared_ptr<Formula> t = make_shared<TrueLiteral>();
     return t;
 }
 
-shared_ptr<Formula> Parser::parseFalseLiteral() {
+shared_ptr<Formula> MuCalculusParser::parseFalseLiteral() {
     expect("false");
     skipWhiteSpace();
     shared_ptr<Formula> f = make_shared<FalseLiteral>();
     return f;
 }
 
-shared_ptr<Formula> Parser::parseRecursionVariable() {
+shared_ptr<Formula> MuCalculusParser::parseRecursionVariable() {
     char n = I[i];
     i++;
     skipWhiteSpace();
@@ -111,7 +176,7 @@ shared_ptr<Formula> Parser::parseRecursionVariable() {
     return r;
 }
 
-shared_ptr<Formula> Parser::parseLogicFormula() {
+shared_ptr<Formula> MuCalculusParser::parseLogicFormula() {
     expect("(");
     skipWhiteSpace();
 
@@ -144,7 +209,7 @@ shared_ptr<Formula> Parser::parseLogicFormula() {
     return l;
 }
 
-OperatorType Parser::parseOperator() {
+OperatorType MuCalculusParser::parseOperator() {
     if (andOperatorFirst(I[i])) {
         return parseLogicAndOperator();
     } else if (orOperatorFirst(I[i])) {
@@ -154,19 +219,19 @@ OperatorType Parser::parseOperator() {
     }
 }
 
-OperatorType Parser::parseLogicAndOperator() {
+OperatorType MuCalculusParser::parseLogicAndOperator() {
     expect("&&");
     skipWhiteSpace();
     return OperatorType::andOperator;
 }
 
-OperatorType Parser::parseLogicOrOperator() {
+OperatorType MuCalculusParser::parseLogicOrOperator() {
     expect("||");
     skipWhiteSpace();
     return OperatorType::orOperator;
 }
 
-shared_ptr<Formula> Parser::parseMuFormula() {
+shared_ptr<Formula> MuCalculusParser::parseMuFormula() {
     expect("mu");
     requireWhiteSpace();
 
@@ -192,7 +257,7 @@ shared_ptr<Formula> Parser::parseMuFormula() {
     return m;
 }
 
-shared_ptr<Formula> Parser::parseNuFormula() {
+shared_ptr<Formula> MuCalculusParser::parseNuFormula() {
     expect("nu");
     requireWhiteSpace();
 
@@ -218,7 +283,7 @@ shared_ptr<Formula> Parser::parseNuFormula() {
     return n;
 }
 
-shared_ptr<Formula> Parser::parseDiamondFormula() {
+shared_ptr<Formula> MuCalculusParser::parseDiamondFormula() {
     expect("<");
     skipWhiteSpace();
 
@@ -244,7 +309,7 @@ shared_ptr<Formula> Parser::parseDiamondFormula() {
     return d;
 }
 
-shared_ptr<Formula> Parser::parseBoxFormula() {
+shared_ptr<Formula> MuCalculusParser::parseBoxFormula() {
     expect("[");
     skipWhiteSpace();
 
@@ -270,42 +335,71 @@ shared_ptr<Formula> Parser::parseBoxFormula() {
     return b;
 }
 
-string Parser::parseActionName() {
-    string n;
 
-    if (actionNameFirst(I[i])) {
-        n.push_back(I[i]);
-        i++;
-    } else {
-        throw invalid_argument("Parse Exception in parseActionName");
-    }
+/// LTS parsing
 
-    while (actionNameNotFirst(I[i])) {
-        n.push_back(I[i]);
-        i++;
-    }
+bool digitFirst(char c) { return c >= '0' && c <= '9'; }
 
-    return n;
-}
+shared_ptr<LTS> LTSParser::parse(std::string input) {
+    LTS lts;
 
-void Parser::expect(const string& e) {
-    if (I.substr(i, e.length()) != e) {
-        throw invalid_argument("Parse Exception in expect");
-    } else {
-        i += e.length();
-    }
-}
+    I = std::move(input);
+    i = 0;
 
-void Parser::skipWhiteSpace() {
-    while (I[i] == ' ') {
-        i++;
-    }
-}
-
-void Parser::requireWhiteSpace() {
-    if (I[i] != ' ') {
-        throw invalid_argument("Parse Exception in requireWhiteSpace");
-    }
-
+    // Parse header
+    expect("des");
     skipWhiteSpace();
+    expect("(");
+    lts.initialState = parseUnsignedInt32();
+    expect(",");
+    parseUnsignedInt32();
+    expect(",");
+    lts.nrStates = parseUnsignedInt32();
+    expect(")");
+    skipWhiteSpace();
+    requireNewLine();
+
+    // Parse edges
+    while (i < I.length()) {
+        uint32_t src, target;
+        string action;
+
+        // Parse edge
+        expect("(");
+        src = parseUnsignedInt32();
+        expect(",\"");
+        action = parseActionName();
+        expect("\",");
+        target = parseUnsignedInt32();
+        expect(")");
+        skipWhiteSpace();
+        skipNewLine();
+
+        // Store edge in data structure
+        lts_map_key key = make_pair(src, action);
+        if (lts.edges.contains(key)) {
+            lts.edges[key].push_back(target);
+        } else {
+            lts.edges.insert({key, {target}});
+        }
+
+        // Increase number of transitions
+        lts.nrTransitions++;
+    }
+
+    return make_shared<LTS>(lts);
+}
+
+uint32_t LTSParser::parseUnsignedInt32() {
+    if (!digitFirst(I[i])) {
+        throw invalid_argument("Parse Exception in parseUnsignedInt32");
+    }
+
+    string n;
+    do {
+        n.push_back(I[i]);
+        i++;
+    } while (digitFirst(I[i]));
+
+    return stoul(n);
 }
