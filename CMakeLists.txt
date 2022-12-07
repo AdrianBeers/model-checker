@@ -3,4 +3,4 @@ project(model_checker)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(model_checker main.cpp Parser.cpp Parser.h Formulae.cpp Formulae.h LTS.cpp LTS.h)
+add_executable(model_checker main.cpp Parser.cpp Parser.h Formulae.cpp Formulae.h LTS.cpp LTS.h Algorithm.cpp Algorithm.h)

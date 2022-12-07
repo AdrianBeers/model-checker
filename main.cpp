@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include "Formulae.h"
+#include "Algorithm.h"
 #include <iostream>
 #include <string>
 #include <memory>
@@ -57,17 +58,24 @@ int main(int argc, char **argv) {
     shared_ptr<Formula> f = mcp.parse(formulaInput);
 
     // Print formula to console
-    cout << "Parsed mu-calculus formula:" << endl;
-    f->pprint();
-    cout << endl;
+//    cout << "Parsed mu-calculus formula:" << endl;
+//    f->pprint();
+//    cout << endl;
 
     // Parse LTS
     LTSParser lp;
     shared_ptr<LTS> lts = lp.parse(ltsInput);
 
     // Print LTS
-    cout << "Parsed LTS:" << endl;
-    lts->pprint();
+//    cout << "Parsed LTS:" << endl;
+//    lts->pprint();
+
+    // Solve formula on LTS using naive algorithm
+    shared_ptr<vset> result = naiveSolve(lts, f);
+    cout << "States in LTS satisfying the formula:" << endl;
+    for (uint32_t s : *result) {
+        cout << s << endl;
+    }
 
     return 0;
 }

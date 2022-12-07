@@ -21,6 +21,7 @@ public:
     uint32_t nrStates;
     map<lts_map_key, list<uint32_t>> edges;
 
+    LTS();
     void pprint();
 };
 
