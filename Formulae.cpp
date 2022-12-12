@@ -55,6 +55,18 @@ void Formula::pprint() {
     }
 }
 
+int Formula::ND() {
+    return 0;
+}
+
+int Formula::AD() {
+    return 0;
+}
+
+int Formula::dAD() {
+    return 0;
+}
+
 TrueLiteral::TrueLiteral() : Formula() {
     this->type = FormulaType::trueLiteral;
 }

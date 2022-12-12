@@ -38,6 +38,9 @@ public:
     char n;
 
     void pprint();
+    int ND();
+    int AD();
+    int dAD();
 };
 
 class TrueLiteral: public Formula {
