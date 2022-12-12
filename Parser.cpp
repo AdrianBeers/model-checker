@@ -359,6 +359,11 @@ shared_ptr<LTS> LTSParser::parse(std::string input) {
     skipWhiteSpace();
     requireNewLine();
 
+    // Check validity of initial state
+    if (lts.initialState >= lts.nrStates) {
+        throw invalid_argument("Parse Exception in LTSParser::parse: invalid initial state");
+    }
+
     // Parse edges
     while (i < I.length()) {
         uint32_t src, target;
@@ -374,6 +379,14 @@ shared_ptr<LTS> LTSParser::parse(std::string input) {
         expect(")");
         skipWhiteSpace();
         skipNewLine();
+
+        // Check validity of states
+        if (src >= lts.nrStates) {
+            throw invalid_argument("Parse Exception in LTSParser::parse: invalid source state");
+        }
+        if (target >= lts.nrStates) {
+            throw invalid_argument("Parse Exception in LTSParser::parse: invalid target state");
+        }
 
         // Store edge in data structure
         lts_map_key key = make_pair(src, action);
