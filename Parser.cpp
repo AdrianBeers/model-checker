@@ -378,9 +378,10 @@ shared_ptr<LTS> LTSParser::parse(std::string input) {
         // Store edge in data structure
         lts_map_key key = make_pair(src, action);
         if (lts.edges.contains(key)) {
-            lts.edges[key].push_back(target);
+            lts.edges[key].insert(target);
         } else {
-            lts.edges.insert({key, {target}});
+            const set<uint32_t> targets = {target};
+            lts.edges.insert({key, targets});
         }
 
         // Increase number of transitions

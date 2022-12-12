@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string>
 #include <map>
-#include <list>
+#include <set>
 
 using namespace std;
 
@@ -19,7 +19,7 @@ public:
     uint32_t initialState;
     uint32_t nrTransitions;
     uint32_t nrStates;
-    map<lts_map_key, list<uint32_t>> edges;
+    map<lts_map_key, set<uint32_t>> edges;
 
     LTS();
     void pprint();
