@@ -38,8 +38,12 @@ public:
     char n;
 
     void pprint();
+
     int ND();
+
+    int maxMuNu(bool isMu);
     int AD();
+
     int dAD();
 };
 

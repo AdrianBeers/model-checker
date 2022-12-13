@@ -75,8 +75,54 @@ int Formula::ND() {
     }
 }
 
+int Formula::maxMuNu(bool isMu) {
+    switch (type) {
+        case FormulaType::trueLiteral:
+        case FormulaType::falseLiteral:
+        case FormulaType::recursionVariable:
+            return 0;
+        case FormulaType::diamondFormula:
+        case FormulaType::boxFormula:
+            return f->maxMuNu(isMu);
+        case FormulaType::logicFormula:
+            return max(f->maxMuNu(isMu), g->maxMuNu(isMu));
+        case FormulaType::muFormula: {
+            if (isMu) {
+                return max(this->AD(), f->maxMuNu(isMu));
+            } else {
+                return f->maxMuNu(isMu);
+            }
+        }
+        case FormulaType::nuFormula: {
+            if (!isMu) {
+                return max(this->AD(), f->maxMuNu(isMu));
+            } else {
+                return f->maxMuNu(isMu);
+            }
+        }
+        default:
+            return 0;
+    }
+}
+
 int Formula::AD() {
-    return 0;
+    switch (type) {
+        case FormulaType::trueLiteral:
+        case FormulaType::falseLiteral:
+        case FormulaType::recursionVariable:
+            return 0;
+        case FormulaType::diamondFormula:
+        case FormulaType::boxFormula:
+            return f->AD();
+        case FormulaType::logicFormula:
+            return max(f->AD(), g->AD());
+        case FormulaType::muFormula:
+            return max(f->AD(), 1 + maxMuNu(false));
+        case FormulaType::nuFormula:
+            return max(f->AD(), 1 + maxMuNu(true));
+        default:
+            return 0;
+    }
 }
 
 int Formula::dAD() {
