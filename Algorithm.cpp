@@ -5,6 +5,7 @@
 #include "Algorithm.h"
 #include <utility>
 #include <list>
+#include <iostream>
 #include <map>
 
 typedef map<char, shared_ptr<vset>> context;
@@ -152,7 +153,7 @@ void EL_initialize(const shared_ptr<Formula>& f, set<int> muSeen, set<int> nuSee
     }
 }
 
-bool isOpen(const shared_ptr<Formula>& f, set<int> seen) {
+bool isOpen(const shared_ptr<Formula>& f, set<char> seen) {
     if (f->type == FormulaType::nuFormula) {
         seen.insert(f->r->n);
         return isOpen(f->f, seen);
@@ -175,18 +176,19 @@ bool isOpen(const shared_ptr<Formula>& f, set<int> seen) {
 }
 
 void reset_subformulae(const shared_ptr<Formula>& f, bool mu, bool nu,
-                          context& a) {
+                          context& a, shared_ptr<LTS> lts) {
     if ((mu && f->type == FormulaType::muFormula) ||
             (nu && f->type == FormulaType::nuFormula)) {
         if (isOpen(f, {})) {
-            a[f->r->n] = emptySet();
+            f->type == FormulaType::muFormula ? emptySet() : allStates(lts);
         }
-        reset_subformulae(f->f, mu, nu, a);
+        reset_subformulae(f->f, mu, nu, a, lts);
     } else if (f->type == FormulaType::logicFormula) {
-        reset_subformulae(f->f, mu, nu, a);
-        reset_subformulae(f->g, mu, nu, a);
-    } else if (f->type != FormulaType::trueLiteral && f->type != FormulaType::falseLiteral) {
-        reset_subformulae(f->f, mu, nu, a);
+        reset_subformulae(f->f, mu, nu, a, lts);
+        reset_subformulae(f->g, mu, nu, a, lts);
+    } else if (f->type == FormulaType::diamondFormula || f->type == FormulaType::boxFormula
+        || f->type == FormulaType::muFormula || f->type == FormulaType::nuFormula) {
+        reset_subformulae(f->f, mu, nu, a, lts);
     }
 }
 
@@ -250,12 +252,9 @@ shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& 
         case FormulaType::nuFormula: {
             char n = f->r->n;
 
-            // initialize array a
-            EL_initialize(f, {}, {}, a, lts);
-
-            if ((f->type == FormulaType::muFormula && nuWrapped) &&
+            if ((f->type == FormulaType::muFormula && nuWrapped) ||
                     (f->type == FormulaType::nuFormula && muWrapped)) {
-                reset_subformulae(f->f, f->type == FormulaType::muFormula, f->type == FormulaType::nuFormula, a);
+                reset_subformulae(f, f->type == FormulaType::muFormula, f->type == FormulaType::nuFormula, a, lts);
             }
 
             // Iterate until fixpoint has been computed
@@ -274,5 +273,6 @@ shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& 
 
 shared_ptr<vset> elSolve(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& f) {
     context a;
+    EL_initialize(f, {}, {}, a, lts);
     return eval_EL(lts, f, a, false, false);
 }
