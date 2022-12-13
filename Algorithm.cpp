@@ -279,11 +279,14 @@ shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& 
 
             if ((f->type == FormulaType::muFormula && nuWrapped) ||
             (f->type == FormulaType::nuFormula && muWrapped)) {
+                if (open.contains(f->r->n)){
+                    a[f->r->n] = f->type == FormulaType::muFormula ? emptySet() : allStates(lts);
+                }
                 if (sub.contains(f->r->n)) {
                     set<char> subformulae = sub.at(f->r->n);
                     for (auto e : subformulae) {
                         if (open.contains(e)) {
-                            a[e] = emptySet();
+                            a[e] = f->type == FormulaType::muFormula ? emptySet() : allStates(lts);
                         }
                     }
                 }
