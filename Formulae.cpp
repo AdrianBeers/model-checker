@@ -5,6 +5,7 @@
 #include "Formulae.h"
 #include <iostream>
 #include <utility>
+#include <algorithm>
 
 using namespace std;
 
@@ -56,7 +57,22 @@ void Formula::pprint() {
 }
 
 int Formula::ND() {
-    return 0;
+    switch (type) {
+        case FormulaType::trueLiteral:
+        case FormulaType::falseLiteral:
+        case FormulaType::recursionVariable:
+            return 0;
+        case FormulaType::diamondFormula:
+        case FormulaType::boxFormula:
+            return f->ND();
+        case FormulaType::logicFormula:
+            return max(f->ND(), g->ND());
+        case FormulaType::muFormula:
+        case FormulaType::nuFormula:
+            return 1 + f->ND();
+        default:
+            return 0;
+    }
 }
 
 int Formula::AD() {
