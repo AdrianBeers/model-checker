@@ -341,7 +341,7 @@ shared_ptr<Formula> MuCalculusParser::parseBoxFormula() {
 bool digitFirst(char c) { return c >= '0' && c <= '9'; }
 
 shared_ptr<LTS> LTSParser::parse(std::string input) {
-    LTS lts;
+    shared_ptr<LTS> lts = make_shared<LTS>();
 
     I = std::move(input);
     i = 0;
@@ -350,17 +350,17 @@ shared_ptr<LTS> LTSParser::parse(std::string input) {
     expect("des");
     skipWhiteSpace();
     expect("(");
-    lts.initialState = parseUnsignedInt32();
+    lts->initialState = parseUnsignedInt32();
     expect(",");
     parseUnsignedInt32();
     expect(",");
-    lts.nrStates = parseUnsignedInt32();
+    lts->nrStates = parseUnsignedInt32();
     expect(")");
     skipWhiteSpace();
     requireNewLine();
 
     // Check validity of initial state
-    if (lts.initialState >= lts.nrStates) {
+    if (lts->initialState >= lts->nrStates) {
         throw invalid_argument("Parse Exception in LTSParser::parse: invalid initial state");
     }
 
@@ -381,27 +381,34 @@ shared_ptr<LTS> LTSParser::parse(std::string input) {
         skipNewLine();
 
         // Check validity of states
-        if (src >= lts.nrStates) {
+        if (src >= lts->nrStates) {
             throw invalid_argument("Parse Exception in LTSParser::parse: invalid source state");
         }
-        if (target >= lts.nrStates) {
+        if (target >= lts->nrStates) {
             throw invalid_argument("Parse Exception in LTSParser::parse: invalid target state");
         }
 
         // Store edge in data structure
+        bool newEdgeInserted = true;
         lts_map_key key = make_pair(src, action);
-        if (lts.edges.contains(key)) {
-            lts.edges[key].insert(target);
+        if (lts->edges.contains(key)) {
+            newEdgeInserted = lts->edges[key].insert(target).second;
         } else {
-            const set<uint32_t> targets = {target};
-            lts.edges.insert({key, targets});
+            lts->edges.insert({key, {target}});
         }
 
-        // Increase number of transitions
-        lts.nrTransitions++;
+        // Increase number of transitions if edge was actually inserted
+        if (newEdgeInserted) {
+            lts->nrTransitions++;
+        }
     }
 
-    return make_shared<LTS>(lts);
+    // Fill list of states
+    for (uint32_t i = 0; i < lts->nrStates; i++) {
+        lts->states->insert(i);
+    }
+
+    return lts;
 }
 
 uint32_t LTSParser::parseUnsignedInt32() {

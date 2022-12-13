@@ -13,10 +13,8 @@ using namespace std;
 #ifndef MODEL_CHECKER_ALGORITHM_H
 #define MODEL_CHECKER_ALGORITHM_H
 
-
-typedef set<uint32_t> vset;
-
-shared_ptr<vset> naiveSolve(shared_ptr<LTS> lts, shared_ptr<Formula> f);
+// Solve formula f using the naive algorithm
+shared_ptr<sset> naiveSolve(shared_ptr<LTS> lts, shared_ptr<Formula> f);
 
 
 #endif //MODEL_CHECKER_ALGORITHM_H

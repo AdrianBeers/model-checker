@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
 //    lts->pprint();
 
     // Solve formula on LTS using naive algorithm
-    shared_ptr<vset> result = naiveSolve(lts, f);
+    shared_ptr<sset> result = naiveSolve(lts, f);
     cout << "States in LTS satisfying the formula:" << endl;
     for (uint32_t s : *result) {
         cout << s << endl;
