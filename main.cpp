@@ -31,19 +31,19 @@ bool readFileContents(const char* fileName, string &out) {
 }
 
 int main(int argc, char **argv) {
-    MuCalculusParser parser;
-
-    shared_ptr<Formula> a = parser.parse("(mu A. nu B. (A || B) && mu C. mu D. (C && (mu E.true || E)))");
-    a->pprint();
-    cout << endl;
-
-    shared_ptr<Formula> b = parser.parse("(mu A. nu B. (A || B) && mu C. nu D. (C && (mu E.true || E)))");
-    b->pprint();
-    cout << endl;
-
-    cout << "a: " << a->ND() << ", b: " << b->ND() << endl;
-    cout << "a: " << a->AD() << ", b: " << b->AD() << endl;
-    cout << "a: " << a->dAD() << ", b: " << b->dAD() << endl;
+//    MuCalculusParser parser;
+//
+//    shared_ptr<Formula> a = parser.parse("(mu A. nu B. (A || B) && mu C. mu D. (C && (mu E.true || E)))");
+//    a->pprint();
+//    cout << endl;
+//
+//    shared_ptr<Formula> b = parser.parse("(mu A. nu B. (A || B) && mu C. nu D. (C && (mu E.true || E)))");
+//    b->pprint();
+//    cout << endl;
+//
+//    cout << "a: " << a->ND() << ", b: " << b->ND() << endl;
+//    cout << "a: " << a->AD() << ", b: " << b->AD() << endl;
+//    cout << "a: " << a->dAD() << ", b: " << b->dAD() << endl;
 
     if (argc < 3) {
         cout << "Usage: model_checker <mu_calculus_file> <lts_file>" << endl;
