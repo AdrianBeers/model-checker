@@ -28,6 +28,8 @@ enum class OperatorType {
 };
 
 class Formula {
+    int maxMuNu(bool isMu);
+    int maxMuNuD(bool isMu, char X);
 public:
     FormulaType type;
     shared_ptr<Formula> f;
@@ -37,14 +39,13 @@ public:
     string a;
     char n;
 
-    void pprint();
+    bool occurs(char X);
 
     int ND();
-
-    int maxMuNu(bool isMu);
     int AD();
-
     int dAD();
+
+    void pprint();
 };
 
 class TrueLiteral: public Formula {

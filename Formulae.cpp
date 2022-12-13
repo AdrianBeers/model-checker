@@ -117,16 +117,81 @@ int Formula::AD() {
         case FormulaType::logicFormula:
             return max(f->AD(), g->AD());
         case FormulaType::muFormula:
-            return max(f->AD(), 1 + maxMuNu(false));
+            return max(f->AD(), 1 + f->maxMuNu(false));
         case FormulaType::nuFormula:
-            return max(f->AD(), 1 + maxMuNu(true));
+            return max(f->AD(), 1 + f->maxMuNu(true));
+        default:
+            return 0;
+    }
+}
+
+bool Formula::occurs(char X) {
+    switch (type) {
+        case FormulaType::trueLiteral:
+        case FormulaType::falseLiteral:
+            return false;
+        case FormulaType::recursionVariable:
+            return n == X;
+        case FormulaType::diamondFormula:
+        case FormulaType::boxFormula:
+            return f->occurs(X);
+        case FormulaType::logicFormula:
+            return f->occurs(X) || g->occurs(X);
+        case FormulaType::muFormula: case FormulaType::nuFormula:
+            return r->occurs(X) || f->occurs(X);
+        default:
+            return false;
+    }
+}
+
+int Formula::maxMuNuD(bool isMu, char X) {
+    switch (type) {
+        case FormulaType::trueLiteral:
+        case FormulaType::falseLiteral:
+        case FormulaType::recursionVariable:
+            return 0;
+        case FormulaType::diamondFormula:
+        case FormulaType::boxFormula:
+            return f->maxMuNuD(isMu, X);
+        case FormulaType::logicFormula:
+            return max(f->maxMuNuD(isMu, X), g->maxMuNuD(isMu, X));
+        case FormulaType::muFormula: {
+            if (isMu && occurs(X)) {
+                return max(this->dAD(), f->maxMuNuD(isMu, X));
+            } else {
+                return f->maxMuNuD(isMu, X);
+            }
+        }
+        case FormulaType::nuFormula: {
+            if (!isMu && occurs(X)) {
+                return max(this->dAD(), f->maxMuNuD(isMu, X));
+            } else {
+                return f->maxMuNuD(isMu, X);
+            }
+        }
         default:
             return 0;
     }
 }
 
 int Formula::dAD() {
-    return 0;
+    switch (type) {
+        case FormulaType::trueLiteral:
+        case FormulaType::falseLiteral:
+        case FormulaType::recursionVariable:
+            return 0;
+        case FormulaType::diamondFormula:
+        case FormulaType::boxFormula:
+            return f->dAD();
+        case FormulaType::logicFormula:
+            return max(f->dAD(), g->dAD());
+        case FormulaType::muFormula:
+            return max(f->dAD(), 1 + f->maxMuNuD(false, r->n));
+        case FormulaType::nuFormula:
+            return max(f->dAD(), 1 + f->maxMuNuD(true, r->n));
+        default:
+            return 0;
+    }
 }
 
 TrueLiteral::TrueLiteral() : Formula() {
