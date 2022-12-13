@@ -86,8 +86,15 @@ int main(int argc, char **argv) {
 
     // Solve formula on LTS using naive algorithm
     shared_ptr<vset> result = naiveSolve(lts, f);
-    cout << "States in LTS satisfying the formula:" << endl;
+    cout << "States in LTS satisfying the formula according to naive algorithm:" << endl;
     for (uint32_t s : *result) {
+        cout << s << endl;
+    }
+
+    // Solve formula on LTS using Emerson Lei algorithm
+    shared_ptr<vset> result2 = elSolve(lts, f);
+    cout << "States in LTS satisfying the formula according to Emerson Lei:" << endl;
+    for (uint32_t s : *result2) {
         cout << s << endl;
     }
 
