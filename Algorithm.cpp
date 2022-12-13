@@ -6,6 +6,7 @@
 #include <utility>
 #include <list>
 #include <map>
+#include <iostream>
 
 typedef map<char, shared_ptr<vset>> context;
 
@@ -130,25 +131,46 @@ shared_ptr<vset> naiveSolve(const shared_ptr<LTS> lts, const shared_ptr<Formula>
  * @param a
  * @param lts
  */
-void EL_initialize(const shared_ptr<Formula>& f, set<int> muSeen, set<int> nuSeen,
-                                         context& a, const shared_ptr<LTS>& lts) {
+void EL_initialize(const shared_ptr<Formula>& f, set<char> muSeen, set<char> nuSeen,
+                   context& a, const shared_ptr<LTS>& lts,
+                   map<char,set<char>>& sub,
+                   set<char>& open, list<pair<char,bool>> order) {
     if (f->type == FormulaType::nuFormula) {
         nuSeen.insert(f->r->n);
-        EL_initialize(f->f, muSeen, nuSeen, a, lts);
+        for (auto e : muSeen) {
+            sub[e].insert(f->r->n);
+        }
+        order.emplace_front(f->r->n, false);
+        EL_initialize(f->f, muSeen, nuSeen, a, lts, sub, open, order);
     } else if (f->type == FormulaType::muFormula) {
         muSeen.insert(f->r->n);
-        EL_initialize(f->f, muSeen, nuSeen, a, lts);
+        for (auto e : nuSeen) {
+            sub[e].insert(f->r->n) ;
+        }
+        order.emplace_front(f->r->n, true);
+        EL_initialize(f->f, muSeen, nuSeen, a, lts, sub, open, order);
     } else if (f->type == FormulaType::recursionVariable) {
         if (muSeen.contains(f->n)) {
             a[f->n] = emptySet();
         } else if (nuSeen.contains(f->n)) {
             a[f->n] = allStates(lts);
         }
+
+        if (!order.empty()) {
+            auto element = order.begin();
+            while (element->first != f->n) {
+                open.insert(element->first);
+                element++;
+                if (element == order.end()) {
+                    break;
+                }
+            }
+        }
     } else if (f->type == FormulaType::boxFormula || f->type == FormulaType::diamondFormula) {
-        EL_initialize(f->f, muSeen, nuSeen, a, lts);
+        EL_initialize(f->f, muSeen, nuSeen, a, lts, sub, open, order);
     } else if (f->type == FormulaType::logicFormula) {
-        EL_initialize(f->f, muSeen, nuSeen, a,lts);
-        EL_initialize(f->g, muSeen, nuSeen, a, lts);
+        EL_initialize(f->f, muSeen, nuSeen, a,lts, sub, open, order);
+        EL_initialize(f->g, muSeen, nuSeen, a, lts, sub, open, order);
     }
 }
 
@@ -191,7 +213,7 @@ void reset_subformulae(const shared_ptr<Formula>& f, bool mu, bool nu,
 }
 
 shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& f, context a,
-                         bool muWrapped, bool nuWrapped) {
+                         bool muWrapped, bool nuWrapped, const map<char, set<char>>& sub, set<char>& open) {
     // Return set of states that satisfies the current formula
     switch (f->type) {
         case FormulaType::trueLiteral:
@@ -205,8 +227,8 @@ shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& 
                 return emptySet();
             }
         case FormulaType::logicFormula: {
-            const shared_ptr<vset> evalF = eval_EL(lts, f->f, a, muWrapped, nuWrapped);
-            const shared_ptr<vset> evalG = eval_EL(lts, f->g, a, muWrapped, nuWrapped);
+            const shared_ptr<vset> evalF = eval_EL(lts, f->f, a, muWrapped, nuWrapped, sub, open);
+            const shared_ptr<vset> evalG = eval_EL(lts, f->g, a, muWrapped, nuWrapped, sub, open);
             if (f->o == OperatorType::andOperator) {
                 return vIntersect(evalF, evalG);
             } else if (f->o == OperatorType::orOperator) {
@@ -219,7 +241,7 @@ shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& 
         case FormulaType::diamondFormula: {
 
             // Evaluate sub formula on all states
-            const shared_ptr<vset> evalF = eval_EL(lts, f->f, a, muWrapped, nuWrapped);
+            const shared_ptr<vset> evalF = eval_EL(lts, f->f, a, muWrapped, nuWrapped, sub, open);
 
             // Compute for which states the formula holds
             shared_ptr<vset> result = emptySet();
@@ -250,12 +272,22 @@ shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& 
         case FormulaType::nuFormula: {
             char n = f->r->n;
 
-            // initialize array a
-            EL_initialize(f, {}, {}, a, lts);
 
-            if ((f->type == FormulaType::muFormula && nuWrapped) &&
-                    (f->type == FormulaType::nuFormula && muWrapped)) {
-                reset_subformulae(f->f, f->type == FormulaType::muFormula, f->type == FormulaType::nuFormula, a);
+            // initialize array a
+//            EL_initialize(f, {}, {}, a, lts, muOpen, nuOpen, order);
+
+
+            if ((f->type == FormulaType::muFormula && nuWrapped) ||
+            (f->type == FormulaType::nuFormula && muWrapped)) {
+                if (sub.contains(f->r->n)) {
+                    set<char> subformulae = sub.at(f->r->n);
+                    for (auto e : subformulae) {
+                        if (open.contains(e)) {
+                            a[e] = emptySet();
+                        }
+                    }
+                }
+
             }
 
             // Iterate until fixpoint has been computed
@@ -263,7 +295,7 @@ shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& 
             do {
                 old = a[n];
                 a[n] = eval_EL(lts, f->f, a, f->type == FormulaType::muFormula,
-                               f->type == FormulaType::nuFormula);
+                               f->type == FormulaType::nuFormula, sub, open);
             } while (*old != *a[n]);
             return a[n];
         }
@@ -274,5 +306,11 @@ shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& 
 
 shared_ptr<vset> elSolve(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& f) {
     context a;
-    return eval_EL(lts, f, a, false, false);
+    set<char> open;
+    list<pair<char, bool>> order;
+    map<char, set<char>> sub;
+
+    // initialize array a
+    EL_initialize(f, {}, {}, a, lts, sub, open, order);
+    return eval_EL(lts, f, a, false, false, sub, open);
 }
