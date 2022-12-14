@@ -17,6 +17,6 @@ using namespace std;
 typedef set<uint32_t> vset;
 
 shared_ptr<vset> naiveSolve(shared_ptr<LTS> lts, shared_ptr<Formula> f);
-
+shared_ptr<vset> elSolve(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& f);
 
 #endif //MODEL_CHECKER_ALGORITHM_H

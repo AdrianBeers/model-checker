@@ -6,8 +6,10 @@
 #include <memory>
 #include <fstream>
 #include <sstream>
+#include <chrono>
 
 using namespace std;
+
 
 bool readFileContents(const char* fileName, string &out) {
     // Open file stream
@@ -84,12 +86,40 @@ int main(int argc, char **argv) {
 //    cout << "Parsed LTS:" << endl;
 //    lts->pprint();
 
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
+
+    auto t1 = high_resolution_clock::now();
+
     // Solve formula on LTS using naive algorithm
     shared_ptr<vset> result = naiveSolve(lts, f);
-    cout << "States in LTS satisfying the formula:" << endl;
+
+    auto t2 = high_resolution_clock::now();
+    cout << "States in LTS satisfying the formula according to naive algorithm:" << endl;
     for (uint32_t s : *result) {
         cout << s << endl;
     }
+
+    /* Getting number of milliseconds as a double. */
+    duration<double, std::milli> ms_double = t2 - t1;
+
+    std::cout << ms_double.count() << "ms\n";
+
+    t1 = high_resolution_clock::now();
+    // Solve formula on LTS using Emerson Lei algorithm
+    shared_ptr<vset> result2 = elSolve(lts, f);
+    t2 = high_resolution_clock::now();
+    cout << "States in LTS satisfying the formula according to Emerson Lei:" << endl;
+    for (uint32_t s : *result2) {
+        cout << s << endl;
+    }
+
+    /* Getting number of milliseconds as a double. */
+    ms_double = t2 - t1;
+
+    std::cout << ms_double.count() << "ms\n";
 
     return 0;
 }
