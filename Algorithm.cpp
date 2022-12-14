@@ -123,33 +123,18 @@ shared_ptr<vset> naiveSolve(const shared_ptr<LTS> lts, const shared_ptr<Formula>
     return eval(lts, f, e);
 }
 
-/**
- *
- * @param f
- * @param muSeen
- * @param nuSeen
- * @param a
- * @param lts
- */
-void EL_initialize(const shared_ptr<Formula>& f, set<int> muSeen, set<int> nuSeen,
-                                         context& a, const shared_ptr<LTS>& lts) {
+void EL_initialize(const shared_ptr<Formula>& f, context& a, const shared_ptr<LTS>& lts) {
     if (f->type == FormulaType::nuFormula) {
-        nuSeen.insert(f->r->n);
-        EL_initialize(f->f, muSeen, nuSeen, a, lts);
+        a[f->r->n] = allStates(lts);
+        EL_initialize(f->f,a, lts);
     } else if (f->type == FormulaType::muFormula) {
-        muSeen.insert(f->r->n);
-        EL_initialize(f->f, muSeen, nuSeen, a, lts);
-    } else if (f->type == FormulaType::recursionVariable) {
-        if (muSeen.contains(f->n)) {
-            a[f->n] = emptySet();
-        } else if (nuSeen.contains(f->n)) {
-            a[f->n] = allStates(lts);
-        }
+        a[f->r->n] = emptySet();
+        EL_initialize(f->f, a, lts);
     } else if (f->type == FormulaType::boxFormula || f->type == FormulaType::diamondFormula) {
-        EL_initialize(f->f, muSeen, nuSeen, a, lts);
+        EL_initialize(f->f,a, lts);
     } else if (f->type == FormulaType::logicFormula) {
-        EL_initialize(f->f, muSeen, nuSeen, a,lts);
-        EL_initialize(f->g, muSeen, nuSeen, a, lts);
+        EL_initialize(f->f, a,lts);
+        EL_initialize(f->g,  a, lts);
     }
 }
 
@@ -273,6 +258,6 @@ shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& 
 
 shared_ptr<vset> elSolve(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& f) {
     context a;
-    EL_initialize(f, {}, {}, a, lts);
+    EL_initialize(f, a, lts);
     return eval_EL(lts, f, a, false, false);
 }
