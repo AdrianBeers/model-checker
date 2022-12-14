@@ -11,7 +11,7 @@
 using namespace std;
 
 
-bool readFileContents(const char* fileName, string &out) {
+bool readFileContents(const char *fileName, string &out) {
     // Open file stream
     ifstream in;
     in.open(fileName);
@@ -94,11 +94,11 @@ int main(int argc, char **argv) {
     auto t1 = high_resolution_clock::now();
 
     // Solve formula on LTS using naive algorithm
-    shared_ptr<vset> result = naiveSolve(lts, f);
+    shared_ptr<sset> result = naiveSolve(lts, f);
 
     auto t2 = high_resolution_clock::now();
     cout << "States in LTS satisfying the formula according to naive algorithm:" << endl;
-    for (uint32_t s : *result) {
+    for (uint32_t s: *result) {
         cout << s << endl;
     }
 
@@ -109,10 +109,10 @@ int main(int argc, char **argv) {
 
     t1 = high_resolution_clock::now();
     // Solve formula on LTS using Emerson Lei algorithm
-    shared_ptr<vset> result2 = elSolve(lts, f);
+    shared_ptr<sset> result2 = emlSolve(lts, f);
     t2 = high_resolution_clock::now();
     cout << "States in LTS satisfying the formula according to Emerson Lei:" << endl;
-    for (uint32_t s : *result2) {
+    for (uint32_t s: *result2) {
         cout << s << endl;
     }
 

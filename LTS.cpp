@@ -11,6 +11,8 @@ LTS::LTS() {
     initialState = 0;
     nrStates = 0;
     nrTransitions = 0;
+
+    states = make_shared<sset>();
 }
 
 void LTS::pprint() {
