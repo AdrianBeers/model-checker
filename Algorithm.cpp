@@ -177,7 +177,7 @@ void reset_subformulae(const shared_ptr<Formula>& f, bool mu, bool nu,
     }
 }
 
-shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& f, context a,
+shared_ptr<vset> eval_EL(const shared_ptr<LTS>& lts, const shared_ptr<Formula>& f, context& a,
                          bool muWrapped, bool nuWrapped) {
     // Return set of states that satisfies the current formula
     switch (f->type) {
