@@ -62,17 +62,14 @@ template<class T>
 string Parser<T>::parseActionName() {
     string n;
 
-    if (actionNameFirst(I[i])) {
-        n.push_back(I[i]);
-        i++;
-    } else {
+    if (!actionNameFirst(I[i])) {
         throw invalid_argument("Parse Exception in parseActionName");
     }
 
-    while (actionNameNotFirst(I[i])) {
+    do {
         n.push_back(I[i]);
         i++;
-    }
+    } while (actionNameNotFirst(I[i]));
 
     return n;
 }

@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <memory>
 
 using namespace std;
 
