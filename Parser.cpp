@@ -28,8 +28,32 @@ void Parser<T>::expect(const string &e) {
 
 template<class T>
 void Parser<T>::skipWhiteSpace() {
-    while (i < I.length() && (I[i] == ' ' || I[i] == '\t')) {
-        i++;
+    bool skipRestOfLine = false;
+    while (i < I.length()) {
+        // Handle comments
+        if (I[i] == '%') {
+            skipRestOfLine = true;
+            i++;
+        }
+
+        // Skip rest of line
+        if (skipRestOfLine) {
+            if (I[i] == '\n') {
+                i++;
+                skipRestOfLine = false;
+                continue;
+            } else {
+                i++;
+                continue;
+            }
+        }
+
+        // Skip whitespace
+        if (I[i] == ' ' || I[i] == '\t') {
+            continue;
+        }
+
+        break;
     }
 }
 
@@ -342,6 +366,8 @@ shared_ptr<LTS> LTSParser::parse(std::string input) {
 
     I = std::move(input);
     i = 0;
+
+    skipWhiteSpace();
 
     // Parse header
     expect("des");
