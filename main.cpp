@@ -7,21 +7,22 @@
 #include <fstream>
 #include <sstream>
 #include <chrono>
+#include <cstring>
 
 using namespace std;
 
 
-bool readFileContents(const char *fileName, string &out) {
-    // Open file stream
+bool readFileContents(const char *filename, string &out) {
+    // Open filename stream
     ifstream in;
-    in.open(fileName);
+    in.open(filename);
 
-    // Check if file exists
+    // Check if filename exists
     if (!in.is_open()) {
         return false;
     }
 
-    // Read file contents
+    // Read filename contents
     stringstream stream;
     stream << in.rdbuf();
     out = stream.str();
@@ -32,34 +33,83 @@ bool readFileContents(const char *fileName, string &out) {
     return true;
 }
 
-int main(int argc, char **argv) {
-//    MuCalculusParser parser;
-//
-//    shared_ptr<Formula> a = parser.parse("(mu A. nu B. (A || B) && mu C. mu D. (C && (mu E.true || E)))");
-//    a->pprint();
-//    cout << endl;
-//
-//    shared_ptr<Formula> b = parser.parse("(mu A. nu B. (A || B) && mu C. nu D. (C && (mu E.true || E)))");
-//    b->pprint();
-//    cout << endl;
-//
-//    cout << "a: " << a->ND() << ", b: " << b->ND() << endl;
-//    cout << "a: " << a->AD() << ", b: " << b->AD() << endl;
-//    cout << "a: " << a->dAD() << ", b: " << b->dAD() << endl;
+void solveUsingNaiveAlgo(const shared_ptr<LTS> &lts, const shared_ptr<Formula> &f) {
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration;
+    using std::milli;
 
-    if (argc < 3) {
-        cout << "Usage: model_checker <mu_calculus_file> <lts_file>" << endl;
+    // Solve formula on LTS using naive algorithm
+    auto t1 = high_resolution_clock::now();
+    shared_ptr<sset> result = naiveSolve(lts, f);
+    auto t2 = high_resolution_clock::now();
+    duration<double, milli> diff = t2 - t1;
+
+    // Print results
+    cout << "States in LTS satisfying the formula according to naive algorithm:" << endl;
+    for (uint32_t s: *result) {
+        cout << s << endl;
+    }
+
+    // Print performance statistics
+    cout << "Number of fixpoint iterations: " << getNrFixpointIterations() << endl;
+    cout << "Algorithm execution time: " << diff.count() << " ms" << endl;
+}
+
+void solveUsingEmAlgo(const shared_ptr<LTS> &lts, const shared_ptr<Formula> &f) {
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration;
+    using std::milli;
+
+    // Solve formula on LTS using naive algorithm
+    auto t1 = high_resolution_clock::now();
+    shared_ptr<sset> result = emlSolve(lts, f);
+    auto t2 = high_resolution_clock::now();
+    duration<double, milli> diff = t2 - t1;
+
+    // Print results
+    cout << "States in LTS satisfying the formula according to Emerson Lei algorithm:" << endl;
+    for (uint32_t s: *result) {
+        cout << s << endl;
+    }
+
+    // Print performance statistics
+    cout << "Number of fixpoint iterations: " << getNrFixpointIterations() << endl;
+    cout << "Algorithm execution time: " << diff.count() << " ms" << endl;
+}
+
+int main(int argc, char **argv) {
+    if (argc < 4) {
+        cout << "Usage: model_checker <algo> <mu_calculus_file> <lts_file>" << endl;
+        cout << " where <algo_id> in {naive, em, both}" << endl;
+        return 1;
+    }
+
+    // Check which model-checking algorithm(s) to use
+    bool useNaiveAlgorithm = false,
+            useEmAlgorithm = false;
+    if (strcmp(argv[1], "naive") == 0) {
+        useNaiveAlgorithm = true;
+    }
+    if (strcmp(argv[1], "em") == 0) {
+        useEmAlgorithm = true;
+    }
+    if (strcmp(argv[1], "both") == 0) {
+        useNaiveAlgorithm = true;
+        useEmAlgorithm = true;
+    }
+    if (!useNaiveAlgorithm && !useEmAlgorithm) {
+        cerr << "Invalid argument for <algo>" << endl;
         return 1;
     }
 
     // Read input files
     string formulaInput, ltsInput;
-    if (!readFileContents(argv[1], formulaInput)) {
-        cout << "Could not read mu calculus input file" << endl;
+    if (!readFileContents(argv[2], formulaInput)) {
+        cerr << "Could not read mu calculus input file" << endl;
         return 1;
     }
-    if (!readFileContents(argv[2], ltsInput)) {
-        cout << "Could not read lts input file" << endl;
+    if (!readFileContents(argv[3], ltsInput)) {
+        cerr << "Could not read lts input file" << endl;
         return 1;
     }
 
@@ -73,53 +123,17 @@ int main(int argc, char **argv) {
     MuCalculusParser mcp;
     shared_ptr<Formula> f = mcp.parse(formulaInput);
 
-    // Print formula to console
-//    cout << "Parsed mu-calculus formula:" << endl;
-//    f->pprint();
-//    cout << endl;
-
     // Parse LTS
     LTSParser lp;
     shared_ptr<LTS> lts = lp.parse(ltsInput);
 
-    // Print LTS
-//    cout << "Parsed LTS:" << endl;
-//    lts->pprint();
-
-    using std::chrono::high_resolution_clock;
-    using std::chrono::duration_cast;
-    using std::chrono::duration;
-    using std::chrono::milliseconds;
-
-    auto t1 = high_resolution_clock::now();
-
-    // Solve formula on LTS using naive algorithm
-    shared_ptr<sset> result = naiveSolve(lts, f);
-
-    auto t2 = high_resolution_clock::now();
-    cout << "States in LTS satisfying the formula according to naive algorithm:" << endl;
-    for (uint32_t s: *result) {
-        cout << s << endl;
+    // Run model-checking algorithm
+    if (useNaiveAlgorithm) {
+        solveUsingNaiveAlgo(lts, f);
     }
-
-    /* Getting number of milliseconds as a double. */
-    duration<double, std::milli> ms_double = t2 - t1;
-
-    std::cout << ms_double.count() << "ms\n";
-
-    t1 = high_resolution_clock::now();
-    // Solve formula on LTS using Emerson Lei algorithm
-    shared_ptr<sset> result2 = emlSolve(lts, f);
-    t2 = high_resolution_clock::now();
-    cout << "States in LTS satisfying the formula according to Emerson Lei:" << endl;
-    for (uint32_t s: *result2) {
-        cout << s << endl;
+    if (useEmAlgorithm) {
+        solveUsingEmAlgo(lts, f);
     }
-
-    /* Getting number of milliseconds as a double. */
-    ms_double = t2 - t1;
-
-    std::cout << ms_double.count() << "ms\n";
 
     return 0;
 }

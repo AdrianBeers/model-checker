@@ -8,8 +8,10 @@
 #include <iostream>
 #include <map>
 
+
 // Type definition of contextual values of recursion variables
 typedef map<char, shared_ptr<sset>> context;
+
 
 /* Utility functions */
 
@@ -17,28 +19,24 @@ shared_ptr<sset> emptySet() {
     return make_shared<sset>();
 }
 
-shared_ptr<sset> ssetUnion(const shared_ptr<sset> s1, const shared_ptr<sset> s2) {
+shared_ptr<sset> ssetUnion(const shared_ptr<sset> &s1, const shared_ptr<sset> &s2) {
     shared_ptr<sset> result = make_shared<sset>();
     set_union(s1->begin(), s1->end(), s2->begin(), s2->end(), inserter(*result, result->begin()));
     return result;
 }
 
-shared_ptr<sset> ssetIntersect(const shared_ptr<sset> s1, const shared_ptr<sset> s2) {
+shared_ptr<sset> ssetIntersect(const shared_ptr<sset> &s1, const shared_ptr<sset> &s2) {
     shared_ptr<sset> result = make_shared<sset>();
     set_intersection(s1->begin(), s1->end(), s2->begin(), s2->end(), inserter(*result, result->begin()));
-    return result;
-}
-
-shared_ptr<sset> ssetDifference(const shared_ptr<sset> s1, const shared_ptr<sset> s2) {
-    shared_ptr<sset> result = make_shared<sset>();
-    set_difference(s1->begin(), s1->end(), s2->begin(), s2->end(), inserter(*result, result->begin()));
     return result;
 }
 
 
 /* Naive algorithm implementation */
 
-shared_ptr<sset> naiveEval(const shared_ptr<LTS> lts, const shared_ptr<Formula> f, context &e) {
+int nrFixpointIterations = 0;
+
+shared_ptr<sset> naiveEval(const shared_ptr<LTS> &lts, const shared_ptr<Formula> &f, context &e) {
     // Return set of states of LTS that satisfies the formula f
     switch (f->type) {
         case FormulaType::trueLiteral:
@@ -103,6 +101,7 @@ shared_ptr<sset> naiveEval(const shared_ptr<LTS> lts, const shared_ptr<Formula> 
             // Iterate until fixpoint has been computed
             shared_ptr<sset> old;
             do {
+                nrFixpointIterations++;
                 old = eNew[n];
                 eNew[n] = naiveEval(lts, f->f, eNew);
             } while (*old != *eNew[n]); // set-inequality comparison
@@ -113,9 +112,19 @@ shared_ptr<sset> naiveEval(const shared_ptr<LTS> lts, const shared_ptr<Formula> 
     }
 }
 
-shared_ptr<sset> naiveSolve(const shared_ptr<LTS> lts, const shared_ptr<Formula> f) {
+shared_ptr<sset> naiveSolve(const shared_ptr<LTS> &lts, const shared_ptr<Formula> &f) {
+    // Initialize empty context
     context e;
+
+    // Reset number of fixpoint iterations
+    nrFixpointIterations = 0;
+
+    // Evaluate formula
     return naiveEval(lts, f, e);
+}
+
+int getNrFixpointIterations() {
+    return nrFixpointIterations;
 }
 
 /* Emerson-Lei algorithm implementation */
@@ -157,8 +166,7 @@ bool isOpen(const shared_ptr<Formula> &f, set<char> seen) {
     }
 }
 
-void resetSubformulae(const shared_ptr<Formula> &f, bool mu, bool nu,
-                      context &a, shared_ptr<LTS> lts) {
+void resetSubformulae(const shared_ptr<Formula> &f, bool mu, bool nu, context &a, const shared_ptr<LTS> &lts) {
     if ((mu && f->type == FormulaType::muFormula) ||
         (nu && f->type == FormulaType::nuFormula)) {
         if (isOpen(f, {})) {
@@ -201,7 +209,6 @@ shared_ptr<sset> emlSolve(const shared_ptr<LTS> &lts, const shared_ptr<Formula> 
         }
         case FormulaType::boxFormula:
         case FormulaType::diamondFormula: {
-
             // Evaluate sub formula on all states
             const shared_ptr<sset> evalF = emlSolve(lts, f->f, a, muWrapped, nuWrapped);
 
@@ -242,10 +249,12 @@ shared_ptr<sset> emlSolve(const shared_ptr<LTS> &lts, const shared_ptr<Formula> 
             // Iterate until fixpoint has been computed
             shared_ptr<sset> old;
             do {
+                nrFixpointIterations++;
                 old = a[n];
                 a[n] = emlSolve(lts, f->f, a, f->type == FormulaType::muFormula,
                                 f->type == FormulaType::nuFormula);
             } while (*old != *a[n]);
+
             return a[n];
         }
         default:
@@ -254,7 +263,15 @@ shared_ptr<sset> emlSolve(const shared_ptr<LTS> &lts, const shared_ptr<Formula> 
 }
 
 shared_ptr<sset> emlSolve(const shared_ptr<LTS> &lts, const shared_ptr<Formula> &f) {
-    context a;
-    initializeEL(f, a, lts);
-    return emlSolve(lts, f, a, false, false);
+    // Initialize empty context
+    context e;
+
+    // Reset number of fixpoint iterations
+    nrFixpointIterations = 0;
+
+    // Initialize Emerson-Lei for the formula
+    initializeEL(f, e, lts);
+
+    // Evaluate formula
+    return emlSolve(lts, f, e, false, false);
 }
