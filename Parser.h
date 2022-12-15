@@ -24,10 +24,6 @@ protected:
 
     void requireWhiteSpace();
 
-    void skipNewLine();
-
-    void requireNewLine();
-
     string parseActionName();
 
 public:

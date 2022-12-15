@@ -49,7 +49,7 @@ void Parser<T>::skipWhiteSpace() {
         }
 
         // Skip whitespace
-        if (I[i] == ' ' || I[i] == '\t') {
+        if (I[i] == ' ' || I[i] == '\t' || I[i] == '\n' || I[i] == '\r') {
             i++;
             continue;
         }
@@ -65,22 +65,6 @@ void Parser<T>::requireWhiteSpace() {
     }
 
     skipWhiteSpace();
-}
-
-template<class T>
-void Parser<T>::skipNewLine() {
-    while (i < I.length() && (I[i] == '\n' || I[i] == '\r')) {
-        i++;
-    }
-}
-
-template<class T>
-void Parser<T>::requireNewLine() {
-    if (i >= I.length() || (I[i] != '\n' && I[i] != '\n')) {
-        throw invalid_argument("Parse Exception in requireNewLine");
-    }
-
-    skipNewLine();
 }
 
 template<class T>
@@ -381,7 +365,6 @@ shared_ptr<LTS> LTSParser::parse(std::string input) {
     lts->nrStates = parseUnsignedInt32();
     expect(")");
     skipWhiteSpace();
-    requireNewLine();
 
     // Check validity of initial state
     if (lts->initialState >= lts->nrStates) {
@@ -402,7 +385,6 @@ shared_ptr<LTS> LTSParser::parse(std::string input) {
         target = parseUnsignedInt32();
         expect(")");
         skipWhiteSpace();
-        skipNewLine();
 
         // Check validity of states
         if (src >= lts->nrStates) {
