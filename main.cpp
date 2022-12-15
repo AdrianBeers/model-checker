@@ -129,6 +129,11 @@ int main(int argc, char **argv) {
     MuCalculusParser mcp;
     shared_ptr<Formula> f = mcp.parse(formulaInput);
 
+    // Print depths of formula
+    cout << "[Formula] ND = " << f->ND() << endl;
+    cout << "[Formula] AD = " << f->AD() << endl;
+    cout << "[Formula] dAD = " << f->dAD() << endl;
+
     // Parse LTS
     LTSParser lp;
     shared_ptr<LTS> lts = lp.parse(ltsInput);
