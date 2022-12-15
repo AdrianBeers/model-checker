@@ -50,6 +50,7 @@ void Parser<T>::skipWhiteSpace() {
 
         // Skip whitespace
         if (I[i] == ' ' || I[i] == '\t') {
+            i++;
             continue;
         }
 
