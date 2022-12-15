@@ -119,12 +119,6 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // Take first line of formula input file as mu-calculus formula input
-    size_t eol = formulaInput.find('\n');
-    if (eol != string::npos) {
-        formulaInput = formulaInput.substr(0, eol);
-    }
-
     // Parse mu-calculus formula
     MuCalculusParser mcp;
     shared_ptr<Formula> f = mcp.parse(formulaInput);

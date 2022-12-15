@@ -7,6 +7,7 @@
 #include <memory>
 #include <utility>
 #include <stdexcept>
+#include <iostream>
 
 using namespace std;
 
@@ -411,7 +412,7 @@ shared_ptr<LTS> LTSParser::parse(std::string input) {
 
     // Fill list of states
     for (uint32_t i = 0; i < lts->nrStates; i++) {
-        lts->states->insert(i);
+        lts->states->insert(lts->states->end(), i);
     }
 
     return lts;
