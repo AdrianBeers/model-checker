@@ -45,14 +45,17 @@ void solveUsingNaiveAlgo(const shared_ptr<LTS> &lts, const shared_ptr<Formula> &
     duration<double, milli> diff = t2 - t1;
 
     // Print results
-    cout << "States in LTS satisfying the formula according to naive algorithm:" << endl;
-    for (uint32_t s: *result) {
-        cout << s << endl;
+    cout << "[Naive]: Initial state of LTS satisfies formula: ";
+    if (result->contains(lts->initialState)) {
+        cout << "true";
+    } else {
+        cout << "false";
     }
+    cout << endl;
 
     // Print performance statistics
-    cout << "Number of fixpoint iterations: " << getNrFixpointIterations() << endl;
-    cout << "Algorithm execution time: " << diff.count() << " ms" << endl;
+    cout << "[Naive]: Number of fixpoint iterations: " << getNrFixpointIterations() << endl;
+    cout << "[Naive]: Algorithm execution time: " << diff.count() << " ms" << endl;
 }
 
 void solveUsingEmAlgo(const shared_ptr<LTS> &lts, const shared_ptr<Formula> &f) {
@@ -67,14 +70,17 @@ void solveUsingEmAlgo(const shared_ptr<LTS> &lts, const shared_ptr<Formula> &f) 
     duration<double, milli> diff = t2 - t1;
 
     // Print results
-    cout << "States in LTS satisfying the formula according to Emerson Lei algorithm:" << endl;
-    for (uint32_t s: *result) {
-        cout << s << endl;
+    cout << "[Emerson-Lei]: Initial state of LTS satisfies formula: ";
+    if (result->contains(lts->initialState)) {
+        cout << "true";
+    } else {
+        cout << "false";
     }
+    cout << endl;
 
     // Print performance statistics
-    cout << "Number of fixpoint iterations: " << getNrFixpointIterations() << endl;
-    cout << "Algorithm execution time: " << diff.count() << " ms" << endl;
+    cout << "[Emerson-Lei]: Number of fixpoint iterations: " << getNrFixpointIterations() << endl;
+    cout << "[Emerson-Lei]: Algorithm execution time: " << diff.count() << " ms" << endl;
 }
 
 int main(int argc, char **argv) {
