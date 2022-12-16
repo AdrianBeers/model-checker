@@ -85,13 +85,14 @@ shared_ptr<sset> naiveEval(const shared_ptr<LTS> &lts, const shared_ptr<Formula>
 
                 // Update result set
                 if (holds) {
-                    result->insert(s);
+                    result->insert(result->end(),s);
                 }
             }
             return result;
         }
         case FormulaType::muFormula:
         case FormulaType::nuFormula: {
+            // Get letter of recursion variable
             char n = f->r->n;
 
             // Prepare context used in fixpoint computation
