@@ -34,7 +34,7 @@ shared_ptr<sset> ssetIntersect(const shared_ptr<sset> &s1, const shared_ptr<sset
 
 /* Naive algorithm implementation */
 
-int nrFixpointIterations = 0;
+unsigned int nrFixpointIterations = 0;
 
 shared_ptr<sset> naiveEval(const shared_ptr<LTS> &lts, const shared_ptr<Formula> &f, context &e) {
     // Return set of states of LTS that satisfies the formula f
@@ -96,7 +96,6 @@ shared_ptr<sset> naiveEval(const shared_ptr<LTS> &lts, const shared_ptr<Formula>
             char n = f->r->n;
 
             // Prepare context used in fixpoint computation
-//            context eNew(e);
             e[n] = (f->type == FormulaType::nuFormula) ? lts->states : emptySet();
 
             // Iterate until fixpoint has been computed
