@@ -153,11 +153,7 @@ bool isOpen(const shared_ptr<Formula> &f, set<char> seen) {
         seen.insert(f->r->n);
         return isOpen(f->f, seen);
     } else if (f->type == FormulaType::recursionVariable) {
-        if (!seen.contains(f->n)) {
-            return true;
-        } else {
-            return false;
-        }
+        return !seen.contains(f->n);
     } else if (f->type == FormulaType::boxFormula || f->type == FormulaType::diamondFormula) {
         return isOpen(f->f, seen);
     } else if (f->type == FormulaType::logicFormula) {
