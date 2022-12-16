@@ -46,6 +46,7 @@ void solveUsingNaiveAlgo(const shared_ptr<LTS> &lts, const shared_ptr<Formula> &
 
     // Print results
     cout << "[Naive]: Initial state of LTS satisfies formula: ";
+    cout << "[Naive]: Initial state of LTS satisfies formula: ";
     if (result->contains(lts->initialState)) {
         cout << "true";
     } else {

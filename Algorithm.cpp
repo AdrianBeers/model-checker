@@ -95,17 +95,17 @@ shared_ptr<sset> naiveEval(const shared_ptr<LTS> &lts, const shared_ptr<Formula>
             char n = f->r->n;
 
             // Prepare context used in fixpoint computation
-            context eNew(e);
-            eNew[n] = (f->type == FormulaType::nuFormula) ? lts->states : emptySet();
+//            context eNew(e);
+            e[n] = (f->type == FormulaType::nuFormula) ? lts->states : emptySet();
 
             // Iterate until fixpoint has been computed
             shared_ptr<sset> old;
             do {
                 nrFixpointIterations++;
-                old = eNew[n];
-                eNew[n] = naiveEval(lts, f->f, eNew);
-            } while (*old != *eNew[n]); // set-inequality comparison
-            return eNew[n];
+                old = e[n];
+                e[n] = naiveEval(lts, f->f, e);
+            } while (*old != *e[n]); // set-inequality comparison
+            return e[n];
         }
         default:
             throw invalid_argument("invalid formula type");
@@ -170,7 +170,7 @@ void resetSubformulae(const shared_ptr<Formula> &f, bool mu, bool nu, context &a
     if ((mu && f->type == FormulaType::muFormula) ||
         (nu && f->type == FormulaType::nuFormula)) {
         if (isOpen(f, {})) {
-            f->type == FormulaType::muFormula ? emptySet() : lts->states;
+            a[f->r->n] = f->type == FormulaType::muFormula ? emptySet() : lts->states;
         }
         resetSubformulae(f->f, mu, nu, a, lts);
     } else if (f->type == FormulaType::logicFormula) {
